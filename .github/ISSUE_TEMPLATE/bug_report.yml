@@ -1,146 +1,67 @@
-name: 🐛 错误报告
-description: 报告一个错误以帮助我们改进
-title: "[BUG] "
-labels: ["bug", "需要分类"]
-assignees: []
-
+name: Bug report
+description: Report a reproducible problem in Xget
+title: "[Bug]: "
+labels:
+  - bug
 body:
   - type: markdown
     attributes:
       value: |
-        感谢您花时间填写错误报告！请提供尽可能详细的信息以帮助我们快速定位和解决问题。
+        Thanks for taking the time to report a bug.
 
+        Please search existing issues before filing a new one. If this is a security
+        vulnerability, do not continue here. Follow the private reporting instructions
+        in [SECURITY.md](https://github.com/xixu-me/Xget/blob/main/SECURITY.md).
   - type: textarea
-    id: bug-description
+    id: summary
     attributes:
-      label: 错误描述
-      description: 清楚简洁地描述这个错误是什么
-      placeholder: 描述您遇到的问题...
+      label: What happened?
+      description: Describe the problem and the actual behavior you observed.
+      placeholder: A request to /npm/... returns the wrong upstream path when...
     validations:
       required: true
-
   - type: textarea
-    id: reproduction-steps
+    id: expected
     attributes:
-      label: 重现步骤
-      description: 重现此行为的步骤
+      label: What did you expect to happen?
+      placeholder: The request should be rewritten to...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area is affected?
+      options:
+        - Routing or path transformation
+        - Git protocol
+        - Docker or OCI registry support
+        - AI inference proxying
+        - Cache behavior
+        - Security headers or validation
+        - Deployment or adapter behavior
+        - Documentation
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Share a minimal reproduction with secrets removed.
       placeholder: |
-        1. 访问 '...'
-        2. 点击 '....'
-        3. 滚动到 '....'
-        4. 看到错误
+        1. Send request to...
+        2. Use headers...
+        3. Observe...
     validations:
       required: true
-
   - type: textarea
-    id: expected-behavior
+    id: environment
     attributes:
-      label: 预期行为
-      description: 清楚简洁地描述您期望发生什么
-      placeholder: 描述您期望的正确行为...
-    validations:
-      required: true
-
-  - type: dropdown
-    id: platform
-    attributes:
-      label: 受影响的平台
-      description: 选择出现问题的平台
-      options:
-        - GitHub
-        - GitLab
-        - Hugging Face
-        - npm
-        - PyPI
-        - conda
-        - 其他
-      multiple: true
-    validations:
-      required: true
-
-  - type: input
-    id: url-example
-    attributes:
-      label: 问题 URL 示例
-      description: 提供出现问题的具体 URL
-      placeholder: https://xget.xi-xu.me/gh/...
-    validations:
-      required: false
-
-  - type: dropdown
-    id: operation-type
-    attributes:
-      label: 操作类型
-      description: 选择您执行的操作类型
-      options:
-        - 文件下载
-        - Git 克隆
-        - Git 推送
-        - Git 拉取
-        - 包管理器使用
-        - 其他
-    validations:
-      required: true
-
+      label: Environment
+      description: Include runtime, deployment target, client, and version details when relevant.
+      placeholder: Cloudflare Workers, local wrangler dev, curl 8.8.0, Node.js 24...
   - type: textarea
-    id: error-message
+    id: additional
     attributes:
-      label: 错误信息
-      description: 如果有错误信息，请粘贴在这里
-      render: shell
-      placeholder: 粘贴完整的错误信息...
-    validations:
-      required: false
-
-  - type: dropdown
-    id: browsers
-    attributes:
-      label: 浏览器/工具
-      description: 您使用的是什么浏览器或下载工具？
-      options:
-        - Chrome
-        - Firefox
-        - Safari
-        - Edge
-        - wget
-        - curl
-        - aria2
-        - git
-        - npm
-        - pip
-        - conda
-        - 其他
-      multiple: true
-    validations:
-      required: false
-
-  - type: input
-    id: instance-url
-    attributes:
-      label: 实例 URL
-      description: 您使用的 Xget 实例 URL
-      placeholder: https://xget.xi-xu.me 或您自己的实例
-    validations:
-      required: false
-
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: 附加信息
-      description: 添加关于问题的任何其他信息
-      placeholder: 任何可能有助于解决问题的额外信息...
-    validations:
-      required: false
-
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: 确认
-      description: 在提交之前，请确认以下内容
-      options:
-        - label: 我已经搜索了现有的 issues，确认这不是重复报告
-          required: true
-        - label: 我已经阅读了存储库文档和故障排除指南
-          required: true
-        - label: 我提供的信息准确且完整
-          required: true
+      label: Additional context
+      description: Logs, headers, screenshots, or links that help explain the issue.

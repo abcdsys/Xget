@@ -5,13 +5,13 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
-    "types": ["@cloudflare/workers-types", "vitest/globals"]
+    "types": ["node"]
   },
   "exclude": ["node_modules", "dist", "coverage"],
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*", "test/**/*", "node_modules/@cloudflare/vitest-pool-workers/types/**/*"]
 }

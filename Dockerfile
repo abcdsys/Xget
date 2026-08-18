@@ -1,38 +1,40 @@
-# Use the official Node.js runtime as the base image
-FROM node:20-alpine
+# --- Stage 1: build the Worker with Wrangler -----------------------
+FROM node:26-alpine AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to leverage Docker cache for dependencies
-COPY package.json package-lock.json* ./
+# Install dependencies & wrangler
+COPY package*.json wrangler.toml ./
+RUN npm ci
 
-# Install dependencies - use npm ci for reproducible builds if package-lock.json exists, otherwise npm install
-RUN if [ -f package-lock.json ]; then npm ci --only=production; else npm install --only=production; fi
+# Copy source and build
+COPY src ./src
+RUN npx wrangler deploy --dry-run --outdir=dist
 
-# Copy the rest of the application code
-COPY . .
+# --- Stage 2: minimal runtime with workerd -------------------------
+FROM node:26-slim AS runtime
+ARG TARGETARCH
 
-# Create a non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-	adduser -S xget -u 1001
+# Install ca-certificates for SSL, then install workerd via npm
+RUN apt-get update && \
+    apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
+    case "${TARGETARCH}" in \
+      amd64) WORKERD_PKG="@cloudflare/workerd-linux-64" ;; \
+      arm64) WORKERD_PKG="@cloudflare/workerd-linux-arm64" ;; \
+      *) echo "Unsupported TARGETARCH: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    npm install -g "${WORKERD_PKG}" && \
+    ln -s "/usr/local/lib/node_modules/${WORKERD_PKG}/bin/workerd" /usr/local/bin/workerd && \
+    workerd --version
 
-# Change ownership of the app directory to the nodejs user
-RUN chown -R xget:nodejs /app
+WORKDIR /worker
 
-# Switch to the non-root user
-USER xget
+# Bring in the compiled Worker bundle and config
+COPY --from=builder /app/dist ./dist
+COPY config.capnp ./config.capnp
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Expose the port workerd listens on
+EXPOSE 8080
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=3000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-	CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
-
-# Start the application
-CMD ["node", "server.js"]
+CMD ["workerd", "serve", "config.capnp"]
